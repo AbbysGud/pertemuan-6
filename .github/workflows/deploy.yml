@@ -3,27 +3,26 @@ name: Deploy to AWS EC2
 on:
   push:
     branches:
-      - main # Trigger deployment on push to main branch
+      - main  # Trigger deployment on push to main branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up SSH
-      uses: webfactory/ssh-agent@v0.5.3 
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Deploy via SSH
-      run:
-        ssh -o StrictHostKeyChecking=no ec2-user@3.107.53.194 << 'EOF'
-          cd /usr/share/nginx/html/pertemuan-6
-          sudo git pull origin main
-          sudo systemctl restart nginx
-        EOF
-      env:
-        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@3.107.53.194 "
+            cd /usr/share/nginx/html/pertemuan-6 &&
+            git config --global --add safe.directory /usr/share/nginx/html/Pertemuan_6 &&
+            sudo git pull origin main &&
+            sudo systemctl restart nginx
+          "
